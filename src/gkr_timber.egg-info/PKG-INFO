@@ -1,0 +1,28 @@
+Metadata-Version: 2.1
+Name: gkr-timber
+Version: 0.1.0
+Summary: Timber Plugin for GKR Project
+Home-page: https://github.com/EPFL-GCM/gkr_timber
+Author: Ziqi Wang
+Author-email: ziqi.wang@epfl.ch
+License: MIT license
+Description: # GKR_Timber
+        
+        Timber Plugin for GKR Project
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Scientific/Engineering
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Unix
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
