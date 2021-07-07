@@ -125,15 +125,13 @@ def draw_partition_result(polygons,
         ax.legend(custom_lines, ['Force Region', 'Bending Region'])
         plt.show()
 
-def evaluate_joint_strength_2D(region_polygons_positive,
-                               region_strength_positive,
-                               region_polygons_negative,
-                               region_strength_negative,
-                               force_x,
-                               bending_z,
-                               minimum_segment_width = 0.1,
-                               tolerance = 1E-4):
 
+def obtain_data_for_optimization(region_polygons_positive,
+                                           region_strength_positive,
+                                           region_polygons_negative,
+                                           region_strength_negative,
+                                           minimum_segment_width = 0.1,
+                                           tolerance = 1E-4):
     slice_region_positive = slice_2Dregion_into_1Dsegment(region_polygons_positive, region_strength_positive, minimum_segment_width, tolerance)
     slice_region_negative = slice_2Dregion_into_1Dsegment(region_polygons_negative, region_strength_negative, minimum_segment_width, tolerance)
 
@@ -167,6 +165,149 @@ def evaluate_joint_strength_2D(region_polygons_positive,
 
                 if (arm_length * sign < 0):
                     force_bending_zero_index.append(len(segment_data) - 1)
+
+    return [slice_region,
+            strength_list,
+            height_list,
+            width_list,
+            arm_length_list,
+            segment_data,
+            force_bending_zero_index]
+
+def measure_joint_maximum_force_strength(region_polygons_positive,
+                                           region_strength_positive,
+                                           region_polygons_negative,
+                                           region_strength_negative,
+                                           bending_z,
+                                           minimum_segment_width = 0.1,
+                                           tolerance = 1E-4):
+    #Obtain Data for Optimization
+    [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
+        = obtain_data_for_optimization(region_polygons_positive,
+                                       region_strength_positive,
+                                       region_polygons_negative,
+                                       region_strength_negative,
+                                       minimum_segment_width,
+                                       tolerance)
+    # CVXPY
+    n_var = len(height_list)
+
+    force_x = cp.Variable(1)
+    height_force_var = cp.Variable(n_var)
+    height_bending_var = cp.Variable(n_var)
+
+    height_array = np.array(height_list)
+    strength_array = np.array(strength_list)
+    arm_array = np.array(arm_length_list)
+
+    constraints = [
+        height_force_var.T @ strength_array + force_x == 0,  # force balanced equations,
+        arm_array.T @ cp.multiply(height_bending_var, strength_array) == bending_z,  # bending balanced equations,
+        height_bending_var.T @ strength_array == 0,  # contact bending don't create force
+        height_bending_var + height_force_var <= height_array,  # maximum usage of contact face area
+        0 <= height_bending_var,  # non-negative bending area
+        0 <= height_force_var,  # non-negative force area
+        height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
+    ]
+
+    prob1 = cp.Problem(cp.Maximize(force_x), constraints)
+    prob1.solve()
+    max_force_value = force_x.value[0]
+    max_force_height_force_var = height_force_var.value
+    max_force_height_bend_var = height_bending_var.value
+
+    prob2 = cp.Problem(cp.Minimize(force_x), constraints)
+    prob2.solve()
+    min_force_value = force_x.value[0]
+    min_force_height_force_var = height_force_var.value
+    min_force_height_bend_var = height_bending_var.value
+
+    if prob1.status not in ["infeasible", "unbounded"] and prob2.status not in ["infeasible", "unbounded"]:
+        return {"success": True,
+                "force_range": [min_force_value, max_force_value],
+                "slice_region": slice_region,
+                "segment_data": segment_data,
+                "height_force": [min_force_height_force_var, max_force_height_force_var],
+                "height_bending": [min_force_height_bend_var, max_force_height_bend_var]}
+    else:
+        return {"success": False}
+
+
+def measure_joint_maximum_bending_strength(region_polygons_positive,
+                                           region_strength_positive,
+                                           region_polygons_negative,
+                                           region_strength_negative,
+                                           force_x,
+                                           minimum_segment_width = 0.1,
+                                           tolerance = 1E-4):
+
+    [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
+        = obtain_data_for_optimization(region_polygons_positive,
+                                       region_strength_positive,
+                                       region_polygons_negative,
+                                       region_strength_negative,
+                                       minimum_segment_width,
+                                       tolerance)
+    # CVXPY
+    n_var = len(height_list)
+
+    bending_z = cp.Variable(1)
+    height_force_var = cp.Variable(n_var)
+    height_bending_var = cp.Variable(n_var)
+
+    height_array = np.array(height_list)
+    strength_array = np.array(strength_list)
+    arm_array = np.array(arm_length_list)
+
+    constraints = [
+        height_force_var.T @ strength_array + force_x == 0,  # force balanced equations,
+        arm_array.T @ cp.multiply(height_bending_var, strength_array) == bending_z,  # bending balanced equations,
+        height_bending_var.T @ strength_array == 0,  # contact bending don't create force
+        height_bending_var + height_force_var <= height_array,  # maximum usage of contact face area
+        0 <= height_bending_var,  # non-negative bending area
+        0 <= height_force_var,  # non-negative force area
+        height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
+    ]
+
+    prob1 = cp.Problem(cp.Maximize(bending_z), constraints)
+    prob1.solve()
+    max_bending_value = bending_z.value[0]
+    max_bending_force_var = height_force_var.value
+    max_bending_bend_var = height_bending_var.value
+
+    prob2 = cp.Problem(cp.Minimize(bending_z), constraints)
+    prob2.solve()
+    min_bending_value = bending_z.value[0]
+    min_bending_force_var = height_force_var.value
+    min_bending_bend_var = height_bending_var.value
+
+    if prob1.status not in ["infeasible", "unbounded"] and prob2.status not in ["infeasible", "unbounded"]:
+        return {"success": True,
+                "bending_range" : [min_bending_value, max_bending_value],
+                "slice_region": slice_region,
+                "segment_data": segment_data,
+                "height_force": [min_bending_force_var, max_bending_force_var],
+                "height_bending": [min_bending_bend_var, max_bending_bend_var]}
+    else:
+        return {"success" : False}
+
+
+def evaluate_joint_strength_2D(region_polygons_positive,
+                               region_strength_positive,
+                               region_polygons_negative,
+                               region_strength_negative,
+                               force_x,
+                               bending_z,
+                               minimum_segment_width = 0.1,
+                               tolerance = 1E-4):
+
+    [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
+        = obtain_data_for_optimization(region_polygons_positive,
+                                       region_strength_positive,
+                                       region_polygons_negative,
+                                       region_strength_negative,
+                                       minimum_segment_width,
+                                       tolerance)
 
     #CVXPY
     n_var = len(height_list)
