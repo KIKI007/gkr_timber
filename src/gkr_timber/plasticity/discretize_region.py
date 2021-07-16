@@ -95,7 +95,18 @@ def boolean_intersection_2Dregion_with_x_intervals(region_2Dpolygon_list,
 
     return [polygon_intersec_shapes, polygon_intersec_strength, polygon_intersec_heights]
 
+def draw_2Dregion_wireframe(polygons):
+    import matplotlib.pyplot as plt
+    plt.figure()
 
+    for id in range(0, len(polygons)):
+        poly_coord = polygons[id]
+        coord = poly_coord.copy()
+        coord.append(coord[0])  # repeat the first point to create a 'closed loop'
+        xs, ys = zip(*coord)  # create lists of x and y values
+        plt.plot(xs, ys, color="black")
+
+    plt.show()  # if you need...
 def draw_2Dregion(polygons, strength, strength_min = 0, strength_max = 2):
     import matplotlib.pyplot as plt
     import matplotlib.colors as colors
@@ -158,7 +169,8 @@ def slice_2Dregion_into_1Dsegment(region_2Dpolygon_list,
     x_intervals = project_2Dregion_into_x_intervals(region_2Dpolygon_list)
 
     # the x value of intervals (ascend)
-    x_endpoints = [0]
+    #x_endpoints = [0]
+    x_endpoints = []
     for intv in x_intervals:
         x_endpoints.append(intv[0])
         x_endpoints.append(intv[1])
@@ -205,6 +217,43 @@ def slice_2Dregion_into_1Dsegment(region_2Dpolygon_list,
             "strength" : polygon_intersec_strength,
             "heights" : polygon_intersec_heights}
 
+def slice_2Dregion_into_squares(region_2Dpolygon_list,
+                                region_strength,
+                                resolution,
+                                tolerance = 1E-4):
 
+    result = slice_2Dregion_into_1Dsegment(region_2Dpolygon_list, region_strength, resolution, tolerance)
 
+    squares_shapes = []
+    squares_strength = []
 
+    shapes = result["shapes"]
+    strengths = result["strength"]
+    for id in range(0, len(shapes)):
+        for jd in range(0, len(shapes[id])):
+            poly = shapes[id][jd]
+            bottom_y = poly[0][1]
+            top_y = poly[2][1]
+            left_x = poly[0][0]
+            right_x = poly[1][0]
+            height = top_y - bottom_y
+            num_square = math.floor(height / resolution)
+            for kd in range(0, num_square):
+                sub_poly = [[left_x, bottom_y + kd * resolution],
+                        [right_x, bottom_y + kd * resolution],
+                        [right_x, bottom_y + (kd + 1) * resolution],
+                        [left_x, bottom_y + (kd + 1) * resolution]]
+                sub_strength = strengths[id][jd]
+                squares_shapes.append(sub_poly)
+                squares_strength.append(sub_strength)
+
+            # leftover
+            if top_y - (bottom_y + num_square * resolution) > 1E-4:
+                squares_shapes.append([[left_x, bottom_y + num_square * resolution],
+                                   [right_x, bottom_y + num_square * resolution],
+                                   [right_x, top_y],
+                                   [left_x, top_y]])
+                squares_strength.append(strengths[id][jd])
+
+    return {"shapes" : squares_shapes,
+            "strength" : squares_strength}

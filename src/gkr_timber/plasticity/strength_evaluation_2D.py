@@ -126,12 +126,13 @@ def draw_partition_result(polygons,
         plt.show()
 
 
-def obtain_data_for_optimization(region_polygons_positive,
-                                           region_strength_positive,
-                                           region_polygons_negative,
-                                           region_strength_negative,
-                                           minimum_segment_width = 0.1,
-                                           tolerance = 1E-4):
+def obtain_data_for_optimization_2D(region_polygons_positive,
+                                    region_strength_positive,
+                                    region_polygons_negative,
+                                    region_strength_negative,
+                                    minimum_segment_width = 0.1,
+                                    tolerance = 1E-4):
+
     slice_region_positive = slice_2Dregion_into_1Dsegment(region_polygons_positive, region_strength_positive, minimum_segment_width, tolerance)
     slice_region_negative = slice_2Dregion_into_1Dsegment(region_polygons_negative, region_strength_negative, minimum_segment_width, tolerance)
 
@@ -183,7 +184,7 @@ def measure_joint_maximum_force_strength(region_polygons_positive,
                                            tolerance = 1E-4):
     #Obtain Data for Optimization
     [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
-        = obtain_data_for_optimization(region_polygons_positive,
+        = obtain_data_for_optimization_2D(region_polygons_positive,
                                        region_strength_positive,
                                        region_polygons_negative,
                                        region_strength_negative,
@@ -202,12 +203,12 @@ def measure_joint_maximum_force_strength(region_polygons_positive,
 
     constraints = [
         height_force_var.T @ strength_array + force_x == 0,  # force balanced equations,
-        arm_array.T @ cp.multiply(height_bending_var, strength_array) == bending_z,  # bending balanced equations,
+        arm_array.T @ cp.multiply(height_bending_var, strength_array) + bending_z == 0,  # bending balanced equations,
         height_bending_var.T @ strength_array == 0,  # contact bending don't create force
         height_bending_var + height_force_var <= height_array,  # maximum usage of contact face area
         0 <= height_bending_var,  # non-negative bending area
         0 <= height_force_var,  # non-negative force area
-        height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
+        #height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
     ]
 
     prob1 = cp.Problem(cp.Maximize(force_x), constraints)
@@ -242,7 +243,7 @@ def measure_joint_maximum_bending_strength(region_polygons_positive,
                                            tolerance = 1E-4):
 
     [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
-        = obtain_data_for_optimization(region_polygons_positive,
+        = obtain_data_for_optimization_2D(region_polygons_positive,
                                        region_strength_positive,
                                        region_polygons_negative,
                                        region_strength_negative,
@@ -261,12 +262,12 @@ def measure_joint_maximum_bending_strength(region_polygons_positive,
 
     constraints = [
         height_force_var.T @ strength_array + force_x == 0,  # force balanced equations,
-        arm_array.T @ cp.multiply(height_bending_var, strength_array) == bending_z,  # bending balanced equations,
+        arm_array.T @ cp.multiply(height_bending_var, strength_array) + bending_z == 0,  # bending balanced equations,
         height_bending_var.T @ strength_array == 0,  # contact bending don't create force
         height_bending_var + height_force_var <= height_array,  # maximum usage of contact face area
         0 <= height_bending_var,  # non-negative bending area
         0 <= height_force_var,  # non-negative force area
-        height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
+        #height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
     ]
 
     prob1 = cp.Problem(cp.Maximize(bending_z), constraints)
@@ -302,7 +303,7 @@ def evaluate_joint_strength_2D(region_polygons_positive,
                                tolerance = 1E-4):
 
     [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
-        = obtain_data_for_optimization(region_polygons_positive,
+        = obtain_data_for_optimization_2D(region_polygons_positive,
                                        region_strength_positive,
                                        region_polygons_negative,
                                        region_strength_negative,
@@ -323,12 +324,12 @@ def evaluate_joint_strength_2D(region_polygons_positive,
     objective = cp.Maximize(width_array.T@(height_array - height_force_var - height_bending_var))
     constraints = [
         height_force_var.T@strength_array + force_x == 0, # force balanced equations,
-        arm_array.T@cp.multiply(height_bending_var, strength_array) == bending_z, #bending balanced equations,
+        arm_array.T@cp.multiply(height_bending_var, strength_array) + bending_z == 0, #bending balanced equations,
         height_bending_var.T@strength_array == 0, # contact bending don't create force
         height_bending_var + height_force_var <= height_array, # maximum usage of contact face area
         0 <= height_bending_var, # non-negative bending area
         0 <= height_force_var, # non-negative force area
-        height_bending_var[force_bending_zero_index] == 0.0, # zero bending
+        #height_bending_var[force_bending_zero_index] == 0.0, # zero bending
         ]
 
     prob = cp.Problem(objective, constraints)
@@ -342,4 +343,3 @@ def evaluate_joint_strength_2D(region_polygons_positive,
                 "height_bending": height_bending_var.value}
     else:
         return {"stable" : False}
-
