@@ -1,6 +1,6 @@
 import pytest
 import compas
-from gkr_timber.plasticity import discretize_region
+from gkr_timber.plasticity import discretize_polygons
 from gkr_timber.plasticity import strength_evaluation_3D
 from gkr_timber.plasticity import strength_evaluation_2D
 
@@ -155,17 +155,17 @@ def test_discretize_region():
     minimum_segment_width = 0.1
 
     # # Visualize region
-    discretize_region.draw_2Dregion_wireframe(polygons_positive)
-    discretize_region.draw_2Dregion_wireframe(polygons_negative)
-    discretize_region.draw_2Dregion(polygons_positive, strength_positive)
-    discretize_region.draw_2Dregion(polygons_negative, strength_negative)
+    discretize_polygons.draw_polygons_wireframe(polygons_positive)
+    discretize_polygons.draw_polygons_wireframe(polygons_negative)
+    discretize_polygons.draw_polygons_with_strengths(polygons_positive, strength_positive)
+    discretize_polygons.draw_polygons_with_strengths(polygons_negative, strength_negative)
     #
     # # Visualize region slice
-    slice_region_positive = discretize_region.slice_2Dregion_into_1Dsegment(polygons_positive, strength_positive, minimum_segment_width, 1E-4)
-    slice_region_negative = discretize_region.slice_2Dregion_into_1Dsegment(polygons_negative, strength_negative, minimum_segment_width, 1E-4)
+    slice_region_positive = discretize_polygons.slice_polygons_vertically(polygons_positive, strength_positive, minimum_segment_width, 1E-4)
+    slice_region_negative = discretize_polygons.slice_polygons_vertically(polygons_negative, strength_negative, minimum_segment_width, 1E-4)
 
-    discretize_region.draw_2Dregion_from_slicing(slice_region_positive)
-    discretize_region.draw_2Dregion_from_slicing(slice_region_negative)
+    discretize_polygons.draw_decomposition_result_2D(slice_region_positive)
+    discretize_polygons.draw_decomposition_result_2D(slice_region_negative)
 
 
     # Evaluation

@@ -2,14 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fc489a9f-1fe2-4f19-85eb-5923c3770b91" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation_3D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/discretize_polygons.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_discretize_polygons.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_strength_evaluation_2D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_strength_evaluation_3D.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/_images/2d_problem_contact.ai" beforeDir="false" afterPath="$PROJECT_DIR$/docs/_images/2d_problem_contact.ai" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/_images/2d_problem_contact.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/_images/2d_problem_contact.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/test.3dm" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/test.3dm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/test_01.3dm" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/test_01.3dm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gkr_timber/plasticity/discretize_region.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/discretize_region.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation_2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/test.gh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/test.gh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gkr_timber/plasticity/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gkr_timber/plasticity/discretize_region.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation_2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation_2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation_3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gkr_timber/plasticity/strength_evaluation_3D.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_default.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_default.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,9 +40,10 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python tests.pytest in test_strength_evaluation_3D.py">
     <configuration name="test_default" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gkr_timber" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -62,6 +66,80 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <module name="gkr_timber" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/GKR/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_discretize_polygons.py" type="tests" factoryName="py.test" nameIsGenerated="true">
+      <module name="gkr_timber" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/GKR/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_discretize_polygons.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_strength_evaluation_2D.py" type="tests" factoryName="py.test" nameIsGenerated="true">
+      <module name="gkr_timber" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/GKR/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_strength_evaluation_2D.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_strength_evaluation_3D.py" type="tests" factoryName="py.test" nameIsGenerated="true">
+      <module name="gkr_timber" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/GKR/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_strength_evaluation_3D.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.test_default" />
+      <item itemvalue="Python tests.pytest in test_strength_evaluation_2D.py" />
+      <item itemvalue="Python tests.pytest in test_strength_evaluation_3D.py" />
+      <item itemvalue="Python tests.pytest in test_discretize_polygons.py" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.test_default" />
@@ -94,7 +172,8 @@
       <workItem from="1626249236804" duration="4204000" />
       <workItem from="1626344912146" duration="1252000" />
       <workItem from="1626425415915" duration="7782000" />
-      <workItem from="1626439651142" duration="218000" />
+      <workItem from="1626439651142" duration="399000" />
+      <workItem from="1626684621046" duration="19123000" />
     </task>
     <servers />
   </component>
@@ -102,16 +181,17 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="2104" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1620008719645">
-      <screen x="1680" y="23" width="1920" height="1005" />
+    <state x="565" y="235" width="1071" height="748" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1626771324660">
+      <screen x="0" y="0" width="2560" height="1440" />
     </state>
+    <state x="565" y="235" width="1071" height="748" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1440@0.0.2560.1440" timestamp="1626771324660" />
     <state x="2104" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/1680.23.1920.1005/0.23.1680.1027@1680.23.1920.1005" timestamp="1620008719645" />
-    <state width="2518" height="409" key="GridCell.Tab.0.bottom" timestamp="1626438580233">
+    <state width="2518" height="608" key="GridCell.Tab.0.bottom" timestamp="1626775626653">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="427" key="GridCell.Tab.0.bottom/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657469683" />
     <state width="1638" height="427" key="GridCell.Tab.0.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1626352879633" />
-    <state width="2518" height="409" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580233" />
+    <state width="2518" height="608" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1626775626653" />
     <state width="2518" height="517" key="GridCell.Tab.0.bottom/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474202" />
     <state width="1878" height="2" key="GridCell.Tab.0.bottom/0.23.1920.1000@0.23.1920.1000" timestamp="1623280019224" />
     <state width="1878" height="2" key="GridCell.Tab.0.bottom/0.23.1920.1005@0.23.1920.1005" timestamp="1621513229821" />
@@ -123,12 +203,12 @@
     <state width="1878" height="357" key="GridCell.Tab.0.bottom/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764516" />
     <state width="1638" height="86" key="GridCell.Tab.0.bottom/1680.23.1920.1057/0.23.1680.977@0.23.1680.977" timestamp="1620524615273" />
     <state width="2518" height="517" key="GridCell.Tab.0.bottom/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962089" />
-    <state width="2518" height="409" key="GridCell.Tab.0.center" timestamp="1626438580232">
+    <state width="2518" height="608" key="GridCell.Tab.0.center" timestamp="1626775626651">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="427" key="GridCell.Tab.0.center/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657469681" />
     <state width="1638" height="427" key="GridCell.Tab.0.center/0.0.1680.1050@0.0.1680.1050" timestamp="1626352879632" />
-    <state width="2518" height="409" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580232" />
+    <state width="2518" height="608" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1626775626651" />
     <state width="2518" height="517" key="GridCell.Tab.0.center/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474201" />
     <state width="1878" height="2" key="GridCell.Tab.0.center/0.23.1920.1000@0.23.1920.1000" timestamp="1623280019223" />
     <state width="1878" height="2" key="GridCell.Tab.0.center/0.23.1920.1005@0.23.1920.1005" timestamp="1621513229820" />
@@ -140,12 +220,12 @@
     <state width="1878" height="357" key="GridCell.Tab.0.center/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764515" />
     <state width="1638" height="86" key="GridCell.Tab.0.center/1680.23.1920.1057/0.23.1680.977@0.23.1680.977" timestamp="1620524615272" />
     <state width="2518" height="517" key="GridCell.Tab.0.center/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962088" />
-    <state width="2518" height="409" key="GridCell.Tab.0.left" timestamp="1626438580231">
+    <state width="2518" height="608" key="GridCell.Tab.0.left" timestamp="1626775626651">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="427" key="GridCell.Tab.0.left/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657469680" />
     <state width="1638" height="427" key="GridCell.Tab.0.left/0.0.1680.1050@0.0.1680.1050" timestamp="1626352879632" />
-    <state width="2518" height="409" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580231" />
+    <state width="2518" height="608" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1626775626651" />
     <state width="2518" height="517" key="GridCell.Tab.0.left/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474200" />
     <state width="1878" height="2" key="GridCell.Tab.0.left/0.23.1920.1000@0.23.1920.1000" timestamp="1623280019222" />
     <state width="1878" height="2" key="GridCell.Tab.0.left/0.23.1920.1005@0.23.1920.1005" timestamp="1621513229820" />
@@ -157,12 +237,12 @@
     <state width="1878" height="357" key="GridCell.Tab.0.left/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764515" />
     <state width="1638" height="86" key="GridCell.Tab.0.left/1680.23.1920.1057/0.23.1680.977@0.23.1680.977" timestamp="1620524615272" />
     <state width="2518" height="517" key="GridCell.Tab.0.left/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962088" />
-    <state width="2518" height="409" key="GridCell.Tab.0.right" timestamp="1626438580232">
+    <state width="2518" height="608" key="GridCell.Tab.0.right" timestamp="1626775626652">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="427" key="GridCell.Tab.0.right/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657469682" />
     <state width="1638" height="427" key="GridCell.Tab.0.right/0.0.1680.1050@0.0.1680.1050" timestamp="1626352879633" />
-    <state width="2518" height="409" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580232" />
+    <state width="2518" height="608" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1626775626652" />
     <state width="2518" height="517" key="GridCell.Tab.0.right/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474201" />
     <state width="1878" height="2" key="GridCell.Tab.0.right/0.23.1920.1000@0.23.1920.1000" timestamp="1623280019223" />
     <state width="1878" height="2" key="GridCell.Tab.0.right/0.23.1920.1005@0.23.1920.1005" timestamp="1621513229821" />
@@ -174,11 +254,11 @@
     <state width="1878" height="357" key="GridCell.Tab.0.right/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764516" />
     <state width="1638" height="86" key="GridCell.Tab.0.right/1680.23.1920.1057/0.23.1680.977@0.23.1680.977" timestamp="1620524615273" />
     <state width="2518" height="517" key="GridCell.Tab.0.right/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962089" />
-    <state width="2518" height="409" key="GridCell.Tab.1.bottom" timestamp="1626438580235">
+    <state width="2518" height="409" key="GridCell.Tab.1.bottom" timestamp="1626775184242">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="517" key="GridCell.Tab.1.bottom/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657418829" />
-    <state width="2518" height="409" key="GridCell.Tab.1.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580235" />
+    <state width="2518" height="409" key="GridCell.Tab.1.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1626775184242" />
     <state width="2518" height="517" key="GridCell.Tab.1.bottom/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474205" />
     <state width="1878" height="333" key="GridCell.Tab.1.bottom/0.23.1920.999@0.23.1920.999" timestamp="1623332188042" />
     <state width="2518" height="517" key="GridCell.Tab.1.bottom/1680.0.2560.1440/0.0.1680.1050@1680.0.2560.1440" timestamp="1626266416593" />
@@ -186,11 +266,11 @@
     <state width="1878" height="357" key="GridCell.Tab.1.bottom/1680.23.1920.1057/0.23.1680.975@1680.23.1920.1057" timestamp="1620458558028" />
     <state width="1878" height="357" key="GridCell.Tab.1.bottom/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764517" />
     <state width="2518" height="517" key="GridCell.Tab.1.bottom/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962091" />
-    <state width="2518" height="409" key="GridCell.Tab.1.center" timestamp="1626438580234">
+    <state width="2518" height="409" key="GridCell.Tab.1.center" timestamp="1626775184240">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="517" key="GridCell.Tab.1.center/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657418828" />
-    <state width="2518" height="409" key="GridCell.Tab.1.center/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580234" />
+    <state width="2518" height="409" key="GridCell.Tab.1.center/0.0.2560.1440@0.0.2560.1440" timestamp="1626775184240" />
     <state width="2518" height="517" key="GridCell.Tab.1.center/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474203" />
     <state width="1878" height="333" key="GridCell.Tab.1.center/0.23.1920.999@0.23.1920.999" timestamp="1623332188042" />
     <state width="2518" height="517" key="GridCell.Tab.1.center/1680.0.2560.1440/0.0.1680.1050@1680.0.2560.1440" timestamp="1626266416591" />
@@ -198,11 +278,11 @@
     <state width="1878" height="357" key="GridCell.Tab.1.center/1680.23.1920.1057/0.23.1680.975@1680.23.1920.1057" timestamp="1620458558027" />
     <state width="1878" height="357" key="GridCell.Tab.1.center/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764517" />
     <state width="2518" height="517" key="GridCell.Tab.1.center/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962090" />
-    <state width="2518" height="409" key="GridCell.Tab.1.left" timestamp="1626438580234">
+    <state width="2518" height="409" key="GridCell.Tab.1.left" timestamp="1626775184099">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="517" key="GridCell.Tab.1.left/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657418827" />
-    <state width="2518" height="409" key="GridCell.Tab.1.left/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580234" />
+    <state width="2518" height="409" key="GridCell.Tab.1.left/0.0.2560.1440@0.0.2560.1440" timestamp="1626775184099" />
     <state width="2518" height="517" key="GridCell.Tab.1.left/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474203" />
     <state width="1878" height="333" key="GridCell.Tab.1.left/0.23.1920.999@0.23.1920.999" timestamp="1623332188041" />
     <state width="2518" height="517" key="GridCell.Tab.1.left/1680.0.2560.1440/0.0.1680.1050@1680.0.2560.1440" timestamp="1626266416591" />
@@ -210,11 +290,11 @@
     <state width="1878" height="357" key="GridCell.Tab.1.left/1680.23.1920.1057/0.23.1680.975@1680.23.1920.1057" timestamp="1620458558027" />
     <state width="1878" height="357" key="GridCell.Tab.1.left/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764517" />
     <state width="2518" height="517" key="GridCell.Tab.1.left/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962090" />
-    <state width="2518" height="409" key="GridCell.Tab.1.right" timestamp="1626438580235">
+    <state width="2518" height="409" key="GridCell.Tab.1.right" timestamp="1626775184241">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state width="2518" height="517" key="GridCell.Tab.1.right/0.0.1680.1050/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657418828" />
-    <state width="2518" height="409" key="GridCell.Tab.1.right/0.0.2560.1440@0.0.2560.1440" timestamp="1626438580235" />
+    <state width="2518" height="409" key="GridCell.Tab.1.right/0.0.2560.1440@0.0.2560.1440" timestamp="1626775184241" />
     <state width="2518" height="517" key="GridCell.Tab.1.right/0.23.1680.1027/1680.0.2560.1440@1680.0.2560.1440" timestamp="1625657474204" />
     <state width="1878" height="333" key="GridCell.Tab.1.right/0.23.1920.999@0.23.1920.999" timestamp="1623332188042" />
     <state width="2518" height="517" key="GridCell.Tab.1.right/1680.0.2560.1440/0.0.1680.1050@1680.0.2560.1440" timestamp="1626266416592" />
@@ -222,12 +302,30 @@
     <state width="1878" height="357" key="GridCell.Tab.1.right/1680.23.1920.1057/0.23.1680.975@1680.23.1920.1057" timestamp="1620458558028" />
     <state width="1878" height="357" key="GridCell.Tab.1.right/1680.23.1920.1057/0.23.1680.976@1680.23.1920.1057" timestamp="1620478764517" />
     <state width="2518" height="517" key="GridCell.Tab.1.right/1680.23.2560.1352/0.23.1680.1027@1680.23.2560.1352" timestamp="1626190962090" />
+    <state x="818" y="456" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1626769029896">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="818" y="456" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.2560.1440@0.0.2560.1440" timestamp="1626769029896" />
     <state x="667" y="155" width="586" height="735" key="find.popup" timestamp="1623280203633">
       <screen x="0" y="23" width="1920" height="1000" />
     </state>
     <state x="667" y="155" width="586" height="735" key="find.popup/0.23.1920.1000@0.23.1920.1000" timestamp="1623280203633" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_discretize_polygons.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/gkr_timber$test_discretize_region.coverage" NAME="test_discretize_region Coverage Results" MODIFIED="1626694345932" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/gkr_timber$test_default.coverage" NAME="test_default Coverage Results" MODIFIED="1626436981226" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/gkr_timber$pytest_in_test_discretize_region_py.coverage" NAME="pytest in test_discretize_polygons.py Coverage Results" MODIFIED="1626704086962" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/gkr_timber$pytest_in_test_strength_evaluation_2D_py.coverage" NAME="pytest in test_strength_evaluation_2D.py Coverage Results" MODIFIED="1626770367311" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/gkr_timber$pytest_in_test_strength_evaluation_3D_py.coverage" NAME="pytest in test_strength_evaluation_3D.py Coverage Results" MODIFIED="1626775626640" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

@@ -4,9 +4,11 @@ from __future__ import division
 import cvxpy as cp
 import numpy as np
 
-from .discretize_region import slice_2Dregion_into_squares
+from gkr_timber.plasticity.discretize_polygons import squarize_polygons
+from gkr_timber.plasticity.discretize_polygons import get_polygon_corner
+from gkr_timber.plasticity.discretize_polygons import create_rectangle
 
-def obtain_contact_decomposition_from_result(result):
+def extract_geometry_from_evlaution_3D_result(result, tolerance = 1E-4):
 
     polygons_bending_y = [[], []]
     polygons_bending_z = [[], []]
@@ -14,14 +16,10 @@ def obtain_contact_decomposition_from_result(result):
 
     var_index = 0
     for side_index in range(0, 2):
-        polygons = result["regions"][side_index]["shapes"]
+        polygons = result["squares_shapes"][side_index]
         for id in range(0, len(polygons)):
             poly_shape = polygons[id]
-
-            left_y = poly_shape[0][0]
-            right_y = poly_shape[1][0]
-            bottom_z = poly_shape[0][1]
-            top_z = poly_shape[2][1]
+            [left_y, right_y, bottom_z, top_z] = get_polygon_corner(poly_shape)
 
             area_bending_y = result["area_y_bending"][var_index]
             area_bending_z = result["area_z_bending"][var_index]
@@ -30,35 +28,29 @@ def obtain_contact_decomposition_from_result(result):
             # region bending y
             y_bending_z_height = area_bending_y / (right_y - left_y) / 2
             y_bending_z_range = [bottom_z + y_bending_z_height, top_z - y_bending_z_height]
-            if y_bending_z_height > 1E-5:
-                polygons_bending_y[side_index].append([[left_y, bottom_z], [right_y, bottom_z], [right_y, y_bending_z_range[0]], [left_y, y_bending_z_range[0]]])
-                polygons_bending_y[side_index].append([[left_y, y_bending_z_range[1]], [right_y, y_bending_z_range[1]], [right_y, top_z], [left_y, top_z]])
+            if y_bending_z_height > tolerance:
+                polygons_bending_y[side_index].append(create_rectangle(left_y, right_y, bottom_z, y_bending_z_range[0]))
+                polygons_bending_y[side_index].append(create_rectangle(left_y, right_y, y_bending_z_range[1], top_z))
 
             # region bending z
             z_bending_z_height = top_z - bottom_z - y_bending_z_height * 2
             z_bending_y_range = [left_y, right_y]
-            if z_bending_z_height > 1E-5:
+            if z_bending_z_height > tolerance:
                 z_bending_y_width = area_bending_z / (z_bending_z_height) / 2
                 z_bending_y_range = [left_y + z_bending_y_width, right_y - z_bending_y_width]
-                if z_bending_y_width > 1E-5:
-                    polygons_bending_z[side_index].append([[left_y, y_bending_z_range[0]],
-                                           [z_bending_y_range[0], y_bending_z_range[0]],
-                                           [z_bending_y_range[0], y_bending_z_range[1]],
-                                           [left_y, y_bending_z_range[1]]])
-                    polygons_bending_z[side_index].append([[z_bending_y_range[1], y_bending_z_range[0]],
-                                           [right_y, y_bending_z_range[0]],
-                                           [right_y, y_bending_z_range[1]],
-                                           [z_bending_y_range[1], y_bending_z_range[1]]])
+                if z_bending_y_width > tolerance:
+                    polygons_bending_z[side_index].append(create_rectangle(left_y, z_bending_y_range[0], y_bending_z_range[0], y_bending_z_range[1]))
+                    polygons_bending_z[side_index].append(create_rectangle(z_bending_y_range[1], right_y, y_bending_z_range[0], y_bending_z_range[1]))
 
             # region force x
             x_force_y_width = z_bending_y_range[1] - z_bending_y_range[0]
-            if x_force_y_width > 1E-5:
+            if x_force_y_width > tolerance:
                 x_force_z_height = area_force_x / x_force_y_width
-                if x_force_z_height > 1E-5:
-                    polygons_force_x[side_index].append([[z_bending_y_range[0], y_bending_z_range[0]],
-                                           [z_bending_y_range[1], y_bending_z_range[0]],
-                                           [z_bending_y_range[1], y_bending_z_range[0] + x_force_z_height],
-                                           [z_bending_y_range[0], y_bending_z_range[0] + x_force_z_height]])
+                if x_force_z_height > tolerance:
+                    polygons_force_x[side_index].append(create_rectangle(z_bending_y_range[0],
+                                                                         z_bending_y_range[1],
+                                                                         y_bending_z_range[0],
+                                                                         y_bending_z_range[0] + x_force_z_height))
 
             var_index = var_index + 1
     return [polygons_force_x, polygons_bending_y, polygons_bending_z]
@@ -67,115 +59,111 @@ def draw_3D_partition_result(result):
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
 
-    result_polygons = obtain_contact_decomposition_from_result(result)
-    for side_index in range(0, 2):
-        plt.figure()
-        colors = ["blue", "yellow", "red"]
-        color_index = 0
-        for polygons in [result_polygons[0][side_index], result_polygons[1][side_index], result_polygons[2][side_index]]:
-            for poly_coord in polygons:
+    if result["stable"] == True:
+        result_polygons = extract_geometry_from_evlaution_3D_result(result)
+        for side_index in range(0, 2):
+            plt.figure()
+            colors = ["blue", "yellow", "red"]
+            color_index = 0
+            for polygons in [result_polygons[0][side_index], result_polygons[1][side_index], result_polygons[2][side_index]]:
+                for poly_coord in polygons:
+                    coord = poly_coord.copy()
+                    coord.append(coord[0])  # repeat the first point to create a 'closed loop'
+                    xs, ys = zip(*coord)  # create lists of x and y values
+                    plt.fill(xs, ys, color=colors[color_index])
+
+                color_index += 1
+
+            # wireframe
+            for poly_coord in result["squares_shapes"][side_index]:
                 coord = poly_coord.copy()
                 coord.append(coord[0])  # repeat the first point to create a 'closed loop'
                 xs, ys = zip(*coord)  # create lists of x and y values
-                plt.fill(xs, ys, color=colors[color_index])
+                plt.plot(xs, ys, color="black")
 
-            color_index += 1
+            custom_lines = [Line2D([0], [0], color="blue", lw=4),
+                            Line2D([0], [0], color="red", lw=4),
+                            Line2D([0], [0], color="yellow", lw=4)]
 
-        # wireframe
-        for poly_coord in result["regions"][side_index]["shapes"]:
-            coord = poly_coord.copy()
-            coord.append(coord[0])  # repeat the first point to create a 'closed loop'
-            xs, ys = zip(*coord)  # create lists of x and y values
-            plt.plot(xs, ys, color="black")
+            ax = plt.gca()
+            plt.xlabel("Region partition at positive side"
+                       if side_index == 0 else "Region partition at negative side", fontsize=10)
+            ax.legend(custom_lines, ['X Force Region', 'Z Bending Region', 'Y Bending Region'])
+            plt.show()
 
-        custom_lines = [Line2D([0], [0], color="blue", lw=4),
-                        Line2D([0], [0], color="red", lw=4),
-                        Line2D([0], [0], color="yellow", lw=4)]
+def prepare_data_for_optimization_3D(contacts_shapes,
+                                     contacts_strengths,
+                                     bending_y,
+                                     bending_z,
+                                     resolution = 0.1,
+                                     tolerance = 1E-4):
+    [contact_positive_shapes, contact_negative_shapes] = contacts_shapes
+    [contact_positive_strengths, contact_negative_strengths] = contacts_strengths
 
-        ax = plt.gca()
-        plt.xlabel("Region partition at positive side"
-                   if side_index == 0 else "Region partition at negative side", fontsize=10)
-        ax.legend(custom_lines, ['X Force Region', 'Z Bending Region', 'Y Bending Region'])
-        plt.show()
+    [squares_contacts_positive, squares_contacts_positive_strength] = squarize_polygons(contact_positive_shapes, contact_positive_strengths, resolution, tolerance)
+    [squares_contacts_negative, squares_contacts_negative_strength] = squarize_polygons(contact_negative_shapes, contact_negative_strengths, resolution, tolerance)
 
-def obtain_data_for_optimization_3D(region_polygons_positive,
-                                    region_strength_positive,
-                                    region_polygons_negative,
-                                    region_strength_negative,
-                                    minimum_segment_width = 0.1,
-                                    tolerance = 1E-4):
-
-    result_region_positive = slice_2Dregion_into_squares(region_polygons_positive, region_strength_positive, minimum_segment_width, tolerance)
-    result_region_negative = slice_2Dregion_into_squares(region_polygons_negative, region_strength_negative, minimum_segment_width, tolerance)
-
-    regions = [result_region_positive, result_region_negative]
+    squares_shapes = [squares_contacts_positive, squares_contacts_negative]
+    squares_contacts_strength = [squares_contacts_positive_strength, squares_contacts_negative_strength]
 
     strength_list = []
     arm_for_bending_y_list = []
     arm_for_benidng_z_list = []
     area_list = []
-    positive_Mz_index = []
-    positive_My_index = []
+    bending_z_zero_index = []
+    bending_y_zero_index = []
 
     index = 0
     for kd in range(0, 2):
-        region = regions[kd]
+        squares = squares_shapes[kd]
         sign = 1 if kd == 0 else -1
-        for id in range(0, len(region["shapes"])):
-            poly = region["shapes"][id]
-            height = poly[2][1] - poly[1][1]
-            width = poly[1][0] - poly[0][0]
+        for id in range(0, len(squares)):
+            poly = squares[id]
+            [left_y, right_y, bottom_z, top_z] = get_polygon_corner(poly)
+            height = top_z - bottom_z
+            width = right_y - left_y
             area = height * width
-            strength = region["strength"][id]
-            arm_for_bending_y = (poly[2][1] + poly[0][1])/2
-            arm_for_bending_z = -(poly[1][0] + poly[0][0])/2
+            strength = squares_contacts_strength[kd][id]
+            arm_for_bending_y = (bottom_z + top_z)/2
+            arm_for_bending_z = -(left_y + right_y)/2
 
             area_list.append(area)
             arm_for_bending_y_list.append(arm_for_bending_y)
             arm_for_benidng_z_list.append(arm_for_bending_z)
             strength_list.append(strength * sign)
 
-            if sign * arm_for_bending_y >= 0:
-                positive_My_index.append(index)
+            if sign * arm_for_bending_y * bending_y >= 0:
+                bending_y_zero_index.append(index)
 
-            if sign * arm_for_bending_z >= 0:
-                positive_Mz_index.append(index)
+            if sign * arm_for_bending_z * bending_z >= 0:
+                bending_z_zero_index.append(index)
 
             index = index + 1
 
-    return [regions,
+    return [squares_shapes,
             strength_list,
             arm_for_bending_y_list,
             arm_for_benidng_z_list,
             area_list,
-            positive_My_index,
-            positive_Mz_index]
+            bending_y_zero_index,
+            bending_z_zero_index]
 
 
-def evaluate_joint_strength_3D(region_polygons_positive,
-                               region_strength_positive,
-                               region_polygons_negative,
-                               region_strength_negative,
+def evaluate_joint_strength_3D(contacts_shapes,
+                               contacts_strengths,
                                force_x,
                                bending_y,
                                bending_z,
                                resolution = 0.1,
                                tolerance = 1E-4):
-    [regions, strength_list, arm_for_bending_y_list, arm_for_bending_z_list, area_list, positive_My_index, positive_Mz_index] \
-        = obtain_data_for_optimization_3D(region_polygons_positive,
-                                       region_strength_positive,
-                                       region_polygons_negative,
-                                       region_strength_negative,
-                                       resolution,
-                                       tolerance)
 
-    # assign cell to be zero
-    if bending_y < 0:
-        indices = positive_Mz_index.copy()
-        positive_Mz_index = [1 - x for x in indices]
-    if bending_z < 0:
-        indices = positive_My_index.copy()
-        positive_My_index = [1 - x for x in indices]
+    [squares_shapes, strength_list, arm_for_bending_y_list, arm_for_bending_z_list, area_list, bending_y_zero_index, bending_z_zero_index] \
+        = prepare_data_for_optimization_3D(contacts_shapes,
+                                           contacts_strengths,
+                                           bending_y,
+                                           bending_z,
+                                           resolution,
+                                           tolerance)
 
     # CVXPY
     n_var = len(strength_list)
@@ -200,8 +188,8 @@ def evaluate_joint_strength_3D(region_polygons_positive,
         0 <= area_bending_y_var,  # non-negative bending area
         0 <= area_bending_z_var,  # non-negative bending area
         0 <= area_force_x_var,  # non-negative force area
-        area_bending_y_var[positive_My_index] == 0,
-        area_bending_z_var[positive_Mz_index] == 0
+        area_bending_y_var[bending_y_zero_index] == 0,
+        area_bending_z_var[bending_z_zero_index] == 0
     ]
 
     prob = cp.Problem(objective, constraints)
@@ -209,7 +197,7 @@ def evaluate_joint_strength_3D(region_polygons_positive,
 
     if prob.status not in ["infeasible", "unbounded"]:
         return {"stable": True,
-                "regions": regions,
+                "squares_shapes": squares_shapes,
                 "area_x_force": area_force_x_var.value,
                 "area_y_bending": area_bending_y_var.value,
                 "area_z_bending": area_bending_z_var.value,

@@ -4,108 +4,69 @@ from __future__ import division
 import cvxpy as cp
 import numpy as np
 
-from .discretize_region import slice_2Dregion_into_1Dsegment
+from gkr_timber.plasticity.discretize_polygons import create_rectangle
+from gkr_timber.plasticity.discretize_polygons import get_polygon_corner
+from gkr_timber.plasticity.discretize_polygons import slice_polygons_vertically
 
-def get_partition_result(polygons,
-                          region_slice,
-                          segment_data,
-                          height_force,
-                          height_bending):
-    import shapely.geometry
-    polys_force = [[], []]
-    polys_bending = [[], []]
+def extract_geometry_from_evlaution_2D_result(result, tolerance = 1E-4):
+    if result["stable"] == False:
+        return [[], []]
+
+    rectangles_shapes = result["rectangles_shapes"]
+    contact_force_height = result["contacts_forces_height"]
+    contacts_bending_z_height = result["contacts_bending_z_height"]
+
+    polygons_forces = [[], []]
+    polygons_bendings = [[], []]
+    index = 0
     for side_index in range(0, 2):
+        # draw original contact polygons
+        for poly_coord in rectangles_shapes[side_index]:
 
-        # draw partitioned contact regions
-        for id in range(0, len(segment_data)):
+            height_force = contact_force_height[index]
+            height_bend = contacts_bending_z_height[index]
+            [left_y, right_y, bottom_z, top_z] = get_polygon_corner(poly_coord)
 
-            slice_index = segment_data[id][0]
-            interval_index = segment_data[id][1]
-            poly_index = segment_data[id][2]
+            if height_force > tolerance:
+                poly_force = create_rectangle(left_y, right_y, bottom_z, bottom_z + height_force)
+                polygons_forces[side_index].append(poly_force)
+            if height_bend > tolerance:
+                poly_bending = create_rectangle(left_y, right_y, bottom_z + height_force, bottom_z + height_force + height_bend)
+                polygons_bendings[side_index].append(poly_bending)
 
-            if slice_index != side_index:
-                continue
+            index = index + 1
 
-            poly = region_slice[slice_index]["shapes"][interval_index][poly_index]
-            poly_shapely = shapely.geometry.Polygon(poly)
+    return [polygons_forces, polygons_bendings]
 
-            interval = region_slice[slice_index]["intervals"][interval_index]
-
-            cy = poly_shapely.centroid.y
-            tot_height = region_slice[slice_index]["heights"][interval_index][poly_index]
-            bottom_y = cy - tot_height / 2
-            force_y = bottom_y + height_force[id]
-            bending_y = force_y + height_bending[id]
-
-            poly_force = [[interval[0], bottom_y],
-                          [interval[1], bottom_y],
-                          [interval[1], force_y],
-                          [interval[0], force_y]]
-
-            poly_bending = [[interval[0], force_y],
-                            [interval[1], force_y],
-                            [interval[1], bending_y],
-                            [interval[0], bending_y]]
-
-            if height_force[id] > 1e-4:
-                polys_force[side_index].append(poly_force)
-            if height_bending[id] > 1e-4:
-                polys_bending[side_index].append(poly_bending)
-
-
-    return {"polys_force": polys_force, "polys_bending" : polys_bending}
-
-def draw_partition_result(polygons,
-                          region_slice,
-                          segment_data,
-                          height_force,
-                          height_bending):
+def draw_strength_evaluation_2D_result(result):
     import matplotlib.pyplot as plt
-    import matplotlib.colors as colors
-    import matplotlib.cm as cmx
     import shapely.geometry
     from matplotlib.lines import Line2D
 
+    if result["stable"] == False:
+        return
 
+    rectangles_shapes = result["rectangles_shapes"]
+    contact_force_height = result["contacts_forces_height"]
+    contacts_bending_z_height = result["contacts_bending_z_height"]
+
+    index = 0
     for side_index in range(0, 2):
         plt.figure()
 
         # draw original contact polygons
-        for poly_coord in polygons[side_index]:
+        for poly_coord in rectangles_shapes[side_index]:
             coord = poly_coord.copy()
             coord.append(coord[0])  # repeat the first point to create a 'closed loop'
             xs, ys = zip(*coord)  # create lists of x and y values
             plt.plot(xs, ys, color="black")
 
-        # draw partitioned contact regions
-        for id in range(0, len(segment_data)):
-            slice_index = segment_data[id][0]
-            interval_index = segment_data[id][1]
-            poly_index = segment_data[id][2]
+            height_force = contact_force_height[index]
+            height_bend = contacts_bending_z_height[index]
+            [left_y, right_y, bottom_z, top_z] = get_polygon_corner(poly_coord)
 
-            if slice_index != side_index:
-                continue
-
-            poly = region_slice[slice_index]["shapes"][interval_index][poly_index]
-            poly_shapely = shapely.geometry.Polygon(poly)
-
-            interval = region_slice[slice_index]["intervals"][interval_index]
-
-            cy = poly_shapely.centroid.y
-            tot_height = region_slice[slice_index]["heights"][interval_index][poly_index]
-            bottom_y = cy - tot_height / 2
-            force_y = bottom_y + height_force[id]
-            bending_y = force_y + height_bending[id]
-
-            poly_force = [[interval[0], bottom_y],
-                          [interval[1], bottom_y],
-                          [interval[1], force_y],
-                          [interval[0], force_y]]
-
-            poly_bending = [[interval[0], force_y],
-                            [interval[1], force_y],
-                            [interval[1], bending_y],
-                            [interval[0], bending_y]]
+            poly_force = create_rectangle(left_y, right_y, bottom_z, bottom_z + height_force)
+            poly_bending = create_rectangle(left_y, right_y, bottom_z + height_force, bottom_z + height_force + height_bend)
 
             colors = ["blue", "red"]
             color_index = 0
@@ -115,6 +76,8 @@ def draw_partition_result(polygons,
                 xs, ys = zip(*coord)  # create lists of x and y values
                 plt.fill(xs, ys, color=colors[color_index])
                 color_index += 1
+
+            index = index + 1
 
         custom_lines = [Line2D([0], [0], color="blue", lw=4),
                         Line2D([0], [0], color="red", lw=4)]
@@ -126,220 +89,154 @@ def draw_partition_result(polygons,
         plt.show()
 
 
-def obtain_data_for_optimization_2D(region_polygons_positive,
-                                    region_strength_positive,
-                                    region_polygons_negative,
-                                    region_strength_negative,
-                                    minimum_segment_width = 0.1,
-                                    tolerance = 1E-4):
+def prepare_data_for_optimization_2D(contacts_shapes,
+                                     contacts_strengths,
+                                     bending_z,
+                                     resolution,
+                                     tolerance = 1E-4):
+    [contact_positive_shapes, contact_negative_shapes] = contacts_shapes
+    [contact_positive_strengths, contact_negative_strengths] = contacts_strengths
 
-    slice_region_positive = slice_2Dregion_into_1Dsegment(region_polygons_positive, region_strength_positive, minimum_segment_width, tolerance)
-    slice_region_negative = slice_2Dregion_into_1Dsegment(region_polygons_negative, region_strength_negative, minimum_segment_width, tolerance)
+    vertical_slice_contact_positive = slice_polygons_vertically(contact_positive_shapes, contact_positive_strengths, resolution, tolerance)
+    vertical_slice_contact_negative = slice_polygons_vertically(contact_negative_shapes, contact_negative_strengths, resolution, tolerance)
 
-    slice_region = [slice_region_positive, slice_region_negative]
+    vertical_slices = [vertical_slice_contact_positive, vertical_slice_contact_negative]
 
-    strength_list = []
-    height_list = []
-    width_list = []
-    arm_length_list = []
-    segment_data = []
-    force_bending_zero_index = []
+    rectangles_shapes = [[], []]
+    rectangle_widths_y = []
+    rectangles_strengths = []
+    rectangles_heights = []
+    rectangles_torque_arm_y = []
+    bending_zero_indices = []
 
+    index = 0
     for kd in range(0, 2):
-        slice = slice_region[kd]
+        [slice_polygons, slice_strength] = vertical_slices[kd]
         sign = 1 if kd == 0 else -1
-        for id in range(0, len(slice["shapes"])):
-            interval_sta = slice["intervals"][id][0]
-            interval_end = slice["intervals"][id][1]
-            width_interval = interval_end - interval_sta
-            arm_length = (interval_sta + interval_end) / 2
 
-            poly_interval = slice["shapes"][id]
-            for jd in range(0, len(poly_interval)):
-                strength_poly = slice["strength"][id][jd]
-                height_poly = slice["heights"][id][jd]
-                width_list.append(width_interval)
-                strength_list.append(strength_poly * sign * width_interval)
-                height_list.append(height_poly)
-                arm_length_list.append(arm_length)
-                segment_data.append([kd, id, jd])
+        for id in range(0, len(slice_polygons)):
+            polygon = slice_polygons[id]
+            strength = slice_strength[id]
+            [left_y, right_y, bottom_z, top_z] = get_polygon_corner(polygon)
+            torque_arm_y = -(left_y + right_y) / 2
+            width_y = (right_y - left_y)
 
-                if (arm_length * sign < 0):
-                    force_bending_zero_index.append(len(segment_data) - 1)
+            rectangles_shapes[kd].append(polygon)
+            rectangles_strengths.append(strength * sign * width_y)
+            rectangles_heights.append(top_z - bottom_z)
+            rectangles_torque_arm_y.append(torque_arm_y)
+            rectangle_widths_y.append(width_y)
 
-    return [slice_region,
-            strength_list,
-            height_list,
-            width_list,
-            arm_length_list,
-            segment_data,
-            force_bending_zero_index]
+            if (torque_arm_y * sign * bending_z > 0):
+                bending_zero_indices.append(index)
 
-def measure_joint_maximum_force_strength(region_polygons_positive,
-                                           region_strength_positive,
-                                           region_polygons_negative,
-                                           region_strength_negative,
-                                           bending_z,
-                                           minimum_segment_width = 0.1,
-                                           tolerance = 1E-4):
-    #Obtain Data for Optimization
-    [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
-        = obtain_data_for_optimization_2D(region_polygons_positive,
-                                       region_strength_positive,
-                                       region_polygons_negative,
-                                       region_strength_negative,
-                                       minimum_segment_width,
-                                       tolerance)
+            index = index + 1
+
+    return [rectangles_shapes, rectangles_strengths, rectangles_heights, rectangle_widths_y, rectangles_torque_arm_y, bending_zero_indices]
+
+def measure_joint_maximum_force_strength(contacts_shapes,
+                                         contacts_strengths,
+                                         external_bending_force_z,
+                                         resolution,
+                                         tolerance = 1E-4):
+
+    # Prepare Data for Optimization
+    [rectangles_shapes, rectangles_strengths, rectangles_heights, rectangle_widths_y, rectangles_torque_arm_y, bending_zero_indices] \
+        = prepare_data_for_optimization_2D(contacts_shapes,
+                                           contacts_strengths,
+                                           external_bending_force_z,
+                                           resolution,
+                                           tolerance)
+
     # CVXPY
-    n_var = len(height_list)
+    n_var = len(rectangles_heights)
 
-    force_x = cp.Variable(1)
-    height_force_var = cp.Variable(n_var)
-    height_bending_var = cp.Variable(n_var)
+    external_axial_force = cp.Variable(1)
+    contact_force_height_var = cp.Variable(n_var)
+    contact_bending_z_height_var = cp.Variable(n_var)
 
-    height_array = np.array(height_list)
-    strength_array = np.array(strength_list)
-    arm_array = np.array(arm_length_list)
+    height_array = np.array(rectangles_heights)
+    strength_array = np.array(rectangles_strengths)
+    arm_array = np.array(rectangles_torque_arm_y)
 
     constraints = [
-        height_force_var.T @ strength_array + force_x == 0,  # force balanced equations,
-        arm_array.T @ cp.multiply(height_bending_var, strength_array) + bending_z == 0,  # bending balanced equations,
-        height_bending_var.T @ strength_array == 0,  # contact bending don't create force
-        height_bending_var + height_force_var <= height_array,  # maximum usage of contact face area
-        0 <= height_bending_var,  # non-negative bending area
-        0 <= height_force_var,  # non-negative force area
-        #height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
+        contact_force_height_var.T @ strength_array + external_axial_force == 0,  # force balanced equations,
+        arm_array.T @ cp.multiply(contact_bending_z_height_var, strength_array) + external_bending_force_z == 0,  # bending balanced equations,
+        contact_bending_z_height_var.T @ strength_array == 0,  # contact bending don't create force
+        contact_force_height_var + contact_bending_z_height_var <= height_array,  # maximum usage of contact face area
+        0 <= contact_force_height_var,  # non-negative bending area
+        0 <= contact_bending_z_height_var,  # non-negative force area
+        contact_bending_z_height_var[bending_zero_indices] == 0.0,  # zero bending
     ]
 
-    prob1 = cp.Problem(cp.Maximize(force_x), constraints)
+    prob1 = cp.Problem(cp.Maximize(external_axial_force), constraints)
     prob1.solve()
-    max_force_value = force_x.value[0]
-    max_force_height_force_var = height_force_var.value
-    max_force_height_bend_var = height_bending_var.value
+    max_external_axial_force = external_axial_force.value[0]
+    max_force_height_force_var = contact_force_height_var.value
+    max_force_height_bend_var = contact_bending_z_height_var.value
 
-    prob2 = cp.Problem(cp.Minimize(force_x), constraints)
+    prob2 = cp.Problem(cp.Minimize(external_axial_force), constraints)
     prob2.solve()
-    min_force_value = force_x.value[0]
-    min_force_height_force_var = height_force_var.value
-    min_force_height_bend_var = height_bending_var.value
+    min_external_axial_force = external_axial_force.value[0]
+    min_force_height_force_var = contact_force_height_var.value
+    min_force_height_bend_var = contact_bending_z_height_var.value
 
     if prob1.status not in ["infeasible", "unbounded"] and prob2.status not in ["infeasible", "unbounded"]:
-        return {"success": True,
-                "force_range": [min_force_value, max_force_value],
-                "slice_region": slice_region,
-                "segment_data": segment_data,
-                "height_force": [min_force_height_force_var, max_force_height_force_var],
-                "height_bending": [min_force_height_bend_var, max_force_height_bend_var]}
+        return {"stable": True,
+                "external_axial_force_ranges": [min_external_axial_force, max_external_axial_force],
+                "retangles_shapes": rectangles_shapes,
+                "contacts_forces_height": [min_force_height_force_var, max_force_height_force_var],
+                "contacts_bending_z_height": [min_force_height_bend_var, max_force_height_bend_var]}
     else:
-        return {"success": False}
+        return {"stable": False}
 
-
-def measure_joint_maximum_bending_strength(region_polygons_positive,
-                                           region_strength_positive,
-                                           region_polygons_negative,
-                                           region_strength_negative,
-                                           force_x,
-                                           minimum_segment_width = 0.1,
-                                           tolerance = 1E-4):
-
-    [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
-        = obtain_data_for_optimization_2D(region_polygons_positive,
-                                       region_strength_positive,
-                                       region_polygons_negative,
-                                       region_strength_negative,
-                                       minimum_segment_width,
-                                       tolerance)
-    # CVXPY
-    n_var = len(height_list)
-
-    bending_z = cp.Variable(1)
-    height_force_var = cp.Variable(n_var)
-    height_bending_var = cp.Variable(n_var)
-
-    height_array = np.array(height_list)
-    strength_array = np.array(strength_list)
-    arm_array = np.array(arm_length_list)
-
-    constraints = [
-        height_force_var.T @ strength_array + force_x == 0,  # force balanced equations,
-        arm_array.T @ cp.multiply(height_bending_var, strength_array) + bending_z == 0,  # bending balanced equations,
-        height_bending_var.T @ strength_array == 0,  # contact bending don't create force
-        height_bending_var + height_force_var <= height_array,  # maximum usage of contact face area
-        0 <= height_bending_var,  # non-negative bending area
-        0 <= height_force_var,  # non-negative force area
-        #height_bending_var[force_bending_zero_index] == 0.0,  # zero bending
-    ]
-
-    prob1 = cp.Problem(cp.Maximize(bending_z), constraints)
-    prob1.solve()
-    max_bending_value = bending_z.value[0]
-    max_bending_force_var = height_force_var.value
-    max_bending_bend_var = height_bending_var.value
-
-    prob2 = cp.Problem(cp.Minimize(bending_z), constraints)
-    prob2.solve()
-    min_bending_value = bending_z.value[0]
-    min_bending_force_var = height_force_var.value
-    min_bending_bend_var = height_bending_var.value
-
-    if prob1.status not in ["infeasible", "unbounded"] and prob2.status not in ["infeasible", "unbounded"]:
-        return {"success": True,
-                "bending_range" : [min_bending_value, max_bending_value],
-                "slice_region": slice_region,
-                "segment_data": segment_data,
-                "height_force": [min_bending_force_var, max_bending_force_var],
-                "height_bending": [min_bending_bend_var, max_bending_bend_var]}
-    else:
-        return {"success" : False}
-
-
-def evaluate_joint_strength_2D(region_polygons_positive,
-                               region_strength_positive,
-                               region_polygons_negative,
-                               region_strength_negative,
-                               force_x,
-                               bending_z,
-                               minimum_segment_width = 0.1,
+def evaluate_joint_strength_2D(contacts_shapes,
+                               contacts_strengths,
+                               external_axial_force,
+                               external_bending_force_z,
+                               resolution,
                                tolerance = 1E-4):
 
-    [slice_region, strength_list, height_list, width_list, arm_length_list, segment_data, force_bending_zero_index] \
-        = obtain_data_for_optimization_2D(region_polygons_positive,
-                                       region_strength_positive,
-                                       region_polygons_negative,
-                                       region_strength_negative,
-                                       minimum_segment_width,
-                                       tolerance)
+    # Prepare Data for Optimization
+    [rectangles_shapes, rectangles_strengths, rectangles_heights, rectangle_widths_y, rectangles_torque_arm_y, bending_zero_indices] \
+        = prepare_data_for_optimization_2D(contacts_shapes,
+                                           contacts_strengths,
+                                           external_bending_force_z,
+                                           resolution,
+                                           tolerance)
 
-    #CVXPY
-    n_var = len(height_list)
+    # CVXPY
+    n_var = len(rectangles_heights)
 
-    height_force_var = cp.Variable(n_var)
-    height_bending_var = cp.Variable(n_var)
+    contact_force_height_var = cp.Variable(n_var)
+    contact_bending_z_height_var = cp.Variable(n_var)
 
-    height_array = np.array(height_list)
-    strength_array = np.array(strength_list)
-    arm_array = np.array(arm_length_list)
-    width_array = np.array(width_list)
+    height_array = np.array(rectangles_heights)
+    strength_array = np.array(rectangles_strengths)
+    arm_array = np.array(rectangles_torque_arm_y)
+    width_array = np.array(rectangle_widths_y)
 
-    objective = cp.Maximize(width_array.T@(height_array - height_force_var - height_bending_var))
     constraints = [
-        height_force_var.T@strength_array + force_x == 0, # force balanced equations,
-        arm_array.T@cp.multiply(height_bending_var, strength_array) + bending_z == 0, #bending balanced equations,
-        height_bending_var.T@strength_array == 0, # contact bending don't create force
-        height_bending_var + height_force_var <= height_array, # maximum usage of contact face area
-        0 <= height_bending_var, # non-negative bending area
-        0 <= height_force_var, # non-negative force area
-        #height_bending_var[force_bending_zero_index] == 0.0, # zero bending
-        ]
+        contact_force_height_var.T @ strength_array + external_axial_force == 0,  # force balanced equations,
+        arm_array.T @ cp.multiply(contact_bending_z_height_var, strength_array) + external_bending_force_z == 0,  # bending balanced equations,
+        contact_bending_z_height_var.T @ strength_array == 0,  # contact bending don't create force
+        contact_force_height_var + contact_bending_z_height_var <= height_array,  # maximum usage of contact face area
+        0 <= contact_force_height_var,  # non-negative bending area
+        0 <= contact_bending_z_height_var,  # non-negative force area
+    ]
 
+    if bending_zero_indices != []:
+        constraints.append(contact_bending_z_height_var[bending_zero_indices] == 0.0)  # zero bending
+
+
+    objective = cp.Maximize(width_array.T@(height_array - contact_force_height_var - contact_bending_z_height_var))
     prob = cp.Problem(objective, constraints)
     result = prob.solve()
 
     if prob.status not in ["infeasible", "unbounded"]:
         return {"stable": True,
-                "slice_region": slice_region,
-                "segment_data": segment_data,
-                "height_force": height_force_var.value,
-                "height_bending": height_bending_var.value}
+                "rectangles_shapes": rectangles_shapes,
+                "contacts_forces_height": contact_force_height_var.value,
+                "contacts_bending_z_height": contact_bending_z_height_var.value}
     else:
         return {"stable" : False}
